@@ -746,32 +746,26 @@ def extract_features_cd4(seq):
 
     seq = str(seq)
 
-    # Reject too long peptides
     if len(seq) > 15:
         return None
 
-    # Pad to length 15
     if len(seq) < 15:
-        seq = seq + "X" * (15 - len(seq))
+        seq = seq + "X"*(15-len(seq))
 
-    pos = np.zeros((15, len(aa_list)))
+    aa_list_cd4 = list("ACDEFGHIKLMNPQRSTVWY")
+    aa_index_cd4 = {aa:i for i,aa in enumerate(aa_list_cd4)}
+
+    pos = np.zeros((15, len(aa_list_cd4)))
 
     for i in range(15):
         aa = seq[i]
-        if aa in aa_index:
-            pos[i, aa_index[aa]] = 1
+        if aa in aa_index_cd4:
+            pos[i, aa_index_cd4[aa]] = 1
 
     pos = pos.flatten()
 
-    aa_count = Counter(seq)
-    length = len(seq)
-
-    comp = np.array([
-        aa_count.get(aa, 0) / length for aa in aa_list
-    ])
-
     return pos
-
+    
 def safe_feature(p):
     model_type = st.session_state.get("model_type", "CD8")  # default safe
 
