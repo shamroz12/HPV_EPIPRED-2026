@@ -1314,20 +1314,30 @@ if "df" in st.session_state:
                 mean_prob = df["Probability"].mean()
                 epitope_density = len(df[df["Category"]=="Epitope"]) / len(df)
 
-                hydro_score = np.mean([
-                        safe_feature(p)[-7]
-                        for p in df["Peptide"]
-                ])
+        # ==========================
+        # BIOLOGICAL METRICS (CD4 SAFE)
+        # ==========================
 
-                entropy_score = np.mean([
-                        safe_feature(p)[-2]
-                        for p in df["Peptide"]
-                ])
+        def hydrophobicity(seq):
+                hydro = set("AILMFWYV")
+                return sum(aa in hydro for aa in seq) / len(seq)
 
-                charge_score = np.mean([
-                        safe_feature(p)[-3]
-                        for p in df["Peptide"]
-                ])
+        def charge(seq):
+                pos = set("KRH")
+                neg = set("DE")
+                return (sum(aa in pos for aa in seq) - sum(aa in neg for aa in seq)) / len(seq)
+
+        hydro_score = np.mean([
+                hydrophobicity(p)
+                for p in df["Peptide"]
+        ])
+
+        charge_score = np.mean([
+                charge(p)
+                for p in df["Peptide"]
+        ])
+
+        entropy_score = 0   # placeholder (optional to improve later)
 
                 metrics = {
                         "ML Immunogenicity": mean_prob,
