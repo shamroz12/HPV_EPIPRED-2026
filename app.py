@@ -770,7 +770,7 @@ def extract_features_cd4(seq):
         aa_count.get(aa, 0) / length for aa in aa_list
     ])
 
-    return np.concatenate([pos, comp])
+    return pos
 
 def safe_feature(p):
     model_type = st.session_state.get("model_type", "CD8")  # default safe
