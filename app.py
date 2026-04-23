@@ -896,7 +896,8 @@ with tab_cd8:
     lengths = [8, 9, 10]
     threshold = 0.261
     feature_func = extract_features_cd8
-
+    df = run_prediction_pipeline(seq, model, lengths, threshold, feature_func)
+    
     mode = st.radio("Mode (CD8)", ["Single Sequence","Batch Upload"], key="cd8_mode")
     fasta = ""
 
@@ -934,7 +935,8 @@ with tab_cd4:
     lengths = [15]   # based on your notebook
     threshold = 0.5
     feature_func = extract_features_cd4
-
+    df = run_prediction_pipeline(seq, model, lengths, threshold, feature_func)
+    
     mode = st.radio("Mode (CD4)", ["Single Sequence","Batch Upload"], key="cd4_mode")
     fasta = ""
 
