@@ -924,7 +924,7 @@ with tab_cd4:
         st.session_state["model_type"] = "CD4"
 
         model = cd4_model
-        lengths = [15]
+        lengths = list(range(13, 19))   # 13–18
         threshold = 0.5
         feature_func = extract_features_cd4
 
