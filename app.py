@@ -888,79 +888,87 @@ tab_cd8, tab_cd4 = st.tabs([
 # =========================================================
 # CD8
 # =========================================================
-st.session_state["model_type"] = "CD8"
-
 with tab_cd8:
 
-    model = cd8_model
-    lengths = [8, 9, 10]
-    threshold = 0.261
-    feature_func = extract_features_cd8
-    df = run_prediction_pipeline(seq, model, lengths, threshold, feature_func)
-    
-    mode = st.radio("Mode (CD8)", ["Single Sequence","Batch Upload"], key="cd8_mode")
-    fasta = ""
+        model = cd8_model
+        lengths = [8, 9, 10]
+        threshold = 0.261
+        feature_func = extract_features_cd8
 
-    if mode == "Single Sequence":
-        fasta = st.text_area("Paste FASTA Sequence (CD8)", key="cd8_text")
-    else:
-        uploaded = st.file_uploader("Upload FASTA File (CD8)", key="cd8_file")
-        if uploaded:
-            fasta = uploaded.read().decode()
+        mode = st.radio("Mode (CD8)", ["Single Sequence", "Batch Upload"], key="cd8_mode")
+        fasta = ""
 
-    run_scan = st.button("Run CD8 Scan")
+        if mode == "Single Sequence":
+                fasta = st.text_area("Paste FASTA Sequence (CD8)", key="cd8_text")
+        else:
+                uploaded = st.file_uploader("Upload FASTA File (CD8)", key="cd8_file")
+                if uploaded:
+                        fasta = uploaded.read().decode()
 
-    if run_scan and fasta:
+        run_scan = st.button("Run CD8 Scan")
 
-        seq = "".join([
-            l.strip() for l in fasta.split("\n")
-            if not l.startswith(">")
-        ]).upper()
+        # ✅ MOVE HERE
+        if run_scan and fasta:
 
-        df = run_prediction_pipeline(seq, model, lengths, threshold, feature_func)
+                seq = "".join([
+                        l.strip() for l in fasta.split("\n")
+                        if not l.startswith(">")
+                ]).upper()
 
-        if df is not None:
-            st.success("CD8 Prediction Completed ✅")
-            st.session_state["df"] = df
+                df = run_prediction_pipeline(
+                        seq,
+                        model,
+                        lengths,
+                        threshold,
+                        feature_func
+                )
 
+                if df is not None:
+                        st.success("CD8 Prediction Completed ✅")
+                        st.session_state["df"] = df
 
 # =========================================================
 # CD4
 # =========================================================
-st.session_state["model_type"] = "CD4"
-
 with tab_cd4:
 
-    model = cd4_model
-    lengths = [15]   # based on your notebook
-    threshold = 0.5
-    feature_func = extract_features_cd4
-    df = run_prediction_pipeline(seq, model, lengths, threshold, feature_func)
-    
-    mode = st.radio("Mode (CD4)", ["Single Sequence","Batch Upload"], key="cd4_mode")
-    fasta = ""
+        st.session_state["model_type"] = "CD4"
 
-    if mode == "Single Sequence":
-        fasta = st.text_area("Paste FASTA Sequence (CD4)", key="cd4_text")
-    else:
-        uploaded = st.file_uploader("Upload FASTA File (CD4)", key="cd4_file")
-        if uploaded:
-            fasta = uploaded.read().decode()
+        model = cd4_model
+        lengths = [15]
+        threshold = 0.5
+        feature_func = extract_features_cd4
 
-    run_scan = st.button("Run CD4 Scan")
+        mode = st.radio("Mode (CD4)", ["Single Sequence", "Batch Upload"], key="cd4_mode")
+        fasta = ""
 
-    if run_scan and fasta:
+        if mode == "Single Sequence":
+                fasta = st.text_area("Paste FASTA Sequence (CD4)", key="cd4_text")
+        else:
+                uploaded = st.file_uploader("Upload FASTA File (CD4)", key="cd4_file")
+                if uploaded:
+                        fasta = uploaded.read().decode()
 
-        seq = "".join([
-            l.strip() for l in fasta.split("\n")
-            if not l.startswith(">")
-        ]).upper()
+        run_scan = st.button("Run CD4 Scan")
 
-    df = run_prediction_pipeline(seq, model, lengths, threshold, feature_func)
+        if run_scan and fasta:
 
-if df is not None:
-        st.success("CD4 Prediction Completed ✅")
-        st.session_state["df"] = df
+                seq = "".join([
+                        l.strip() for l in fasta.split("\n")
+                        if not l.startswith(">")
+                ]).upper()
+
+                df = run_prediction_pipeline(
+                        seq,
+                        model,
+                        lengths,
+                        threshold,
+                        feature_func
+                )
+
+                if df is not None:
+                        st.success("CD4 Prediction Completed ✅")
+                        st.session_state["df"] = df
 
 
 # ✅ FIXED INDENTATION BLOCK (8 spaces inside if)
