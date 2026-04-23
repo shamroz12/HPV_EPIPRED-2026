@@ -1314,7 +1314,7 @@ if "df" in st.session_state:
                 mean_prob = df["Probability"].mean()
                 epitope_density = len(df[df["Category"]=="Epitope"]) / len(df)
 
-        # ==========================
+                # ==========================
         # BIOLOGICAL METRICS (CD4 SAFE)
         # ==========================
 
@@ -1327,7 +1327,8 @@ if "df" in st.session_state:
                 neg = set("DE")
                 return (sum(aa in pos for aa in seq) - sum(aa in neg for aa in seq)) / len(seq)
 
-                hydro_score = np.mean([
+        # ✅ NOW OUTSIDE FUNCTIONS
+        hydro_score = np.mean([
                 hydrophobicity(p)
                 for p in df["Peptide"]
         ])
