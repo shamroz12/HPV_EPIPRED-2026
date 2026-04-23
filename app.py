@@ -1339,13 +1339,15 @@ if "df" in st.session_state:
 
         entropy_score = 0   # placeholder (optional to improve later)
 
-                metrics = {
-                        "ML Immunogenicity": mean_prob,
-                        "Epitope Density": epitope_density,
-                        "Hydrophobicity": hydro_score,
-                        "Entropy": entropy_score,
-                        "Net Charge": abs(charge_score)
-                }
+               entropy_score = 0
+
+        metrics = {
+                "ML Immunogenicity": mean_prob,
+                "Epitope Density": epitope_density,
+                "Hydrophobicity": hydro_score,
+                "Entropy": entropy_score,
+                "Net Charge": abs(charge_score)
+        }
 
                 categories = list(metrics.keys())
                 values = list(metrics.values())
