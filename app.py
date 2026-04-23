@@ -12,7 +12,39 @@ def generate_peptides(seq, lengths):
             positions.append(i + 1)
 
     return peptides, positions
-    
+
+st.markdown("""
+<style>
+
+/* File uploader main box */
+[data-testid="stFileUploader"] {
+    background: #0f172a !important;
+    border-radius: 12px;
+    padding: 10px;
+}
+
+/* Inner drop area */
+[data-testid="stFileUploaderDropzone"] {
+    background: #020617 !important;
+    border: 1px dashed #38bdf8 !important;
+    border-radius: 10px;
+}
+
+/* Upload text */
+[data-testid="stFileUploaderDropzone"] div {
+    color: white !important;
+}
+
+/* Button */
+[data-testid="stFileUploader"] button {
+    background: linear-gradient(90deg, #6366f1, #06b6d4) !important;
+    color: white !important;
+    border-radius: 8px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 import streamlit as st
 
 st.set_page_config(page_title="HPV EPIPRED", page_icon="🧬", layout="wide")
@@ -538,7 +570,7 @@ canvas {
 
     <div class="hero-content">
         <div class="hero-title">HPV EPIPRED</div>
-        <div class="hero-sub">MHC I Epitope Prediction</div>
+        <div class="hero-sub">MHC I & II Epitope Prediction</div>
 
         <a href="#scanner" class="cta">
             <span class="arrow">↓</span> Launch Scanner
