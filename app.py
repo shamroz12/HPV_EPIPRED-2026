@@ -1257,32 +1257,30 @@ if "df" in st.session_state:
                 st.plotly_chart(fig_density, use_container_width=True, config=config)
 
        
-        # IMMUNOGENICITY FINGERPRINT
-        # ==========================
-        with tab_fingerprint:
+ # ==========================
+# IMMUNOGENICITY FINGERPRINT
+# ==========================
+with tab_fingerprint:
 
-                st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-                st.markdown("### 🧬 Protein Immunogenicity Fingerprint")
+    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+    st.markdown("### 🧬 Protein Immunogenicity Fingerprint")
 
-                st.markdown("""
-        <div class="legend-box">
+    st.markdown("""
+    <div class="legend-box">
 
-        <div class="legend-title">🧬 Fingerprint Metrics</div>
+    <div class="legend-title">🧬 Fingerprint Metrics</div>
 
-        <div class="legend-item">🤖 <b>ML Immunogenicity</b> – Average predicted epitope probability</div>
+    <div class="legend-item">🤖 <b>ML Immunogenicity</b> – Average predicted epitope probability</div>
+    <div class="legend-item">📍 <b>Epitope Density</b> – Fraction of peptides classified as epitopes</div>
+    <div class="legend-item">🧪 <b>Hydrophobicity</b> – Fraction of hydrophobic amino acids</div>
+    <div class="legend-item">🧠 <b>Entropy</b> – Sequence diversity across peptides</div>
+    <div class="legend-item">⚡ <b>Net Charge</b> – Balance of positive and negative residues</div>
 
-        <div class="legend-item">📍 <b>Epitope Density</b> – Fraction of peptides classified as epitopes</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-        <div class="legend-item">🧪 <b>Hydrophobicity</b> – Fraction of hydrophobic amino acids</div>
+    # ✅ EVERYTHING MUST BE INDENTED BELOW
 
-        <div class="legend-item">🧠 <b>Entropy</b> – Sequence diversity across peptides</div>
-
-        <div class="legend-item">⚡ <b>Net Charge</b> – Balance of positive and negative residues</div>
-
-        </div>
-        """, unsafe_allow_html=True)
-
-    # Global metrics
     mean_prob = df["Probability"].mean()
     epitope_density = len(df[df["Category"]=="Epitope"]) / len(df)
 
@@ -1308,34 +1306,34 @@ if "df" in st.session_state:
         "Entropy": entropy_score,
         "Net Charge": abs(charge_score)
     }
-                
-                categories = list(metrics.keys())
-                values = list(metrics.values())
 
+    categories = list(metrics.keys())
+    values = list(metrics.values())
 
-                fig_radar = go.Figure()
+    fig_radar = go.Figure()
 
-                fig_radar.add_trace(
-                        go.Scatterpolar(
-                                r=values,
-                                theta=categories,
-                                fill="toself",
-                                line=dict(color="#6366f1", width=3),
-                                name="Protein Profile"
-                        )
-                )
+    fig_radar.add_trace(
+        go.Scatterpolar(
+            r=values,
+            theta=categories,
+            fill="toself",
+            line=dict(color="#6366f1", width=3),
+            name="Protein Profile"
+        )
+    )
 
-                fig_radar.update_layout(
-                        polar=dict(
-                                radialaxis=dict(
-                                        visible=True,
-                                        range=[0,1]
-                                )
-                        ),
-                        height=500
-                )
+    fig_radar.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0,1]
+            )
+        ),
+        height=500
+    )
 
-                st.plotly_chart(fig_radar, use_container_width=True, config=config)
+    st.plotly_chart(fig_radar, use_container_width=True, config=config)
+    
             
         # ==========================
         # IMMUNOGENIC SCORE TAB
