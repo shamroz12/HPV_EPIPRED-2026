@@ -952,7 +952,13 @@ with tab_cd4:
             st.success("CD4 Prediction Completed ✅")
             st.session_state["df"] = df
 
-     if "df" in st.session_state:
+    if df is not None:
+    st.success("CD4 Prediction Completed ✅")
+    st.session_state["df"] = df
+
+
+  # ✅ FIXED INDENTATION BLOCK
+if "df" in st.session_state:
 
     df = st.session_state["df"]
 
