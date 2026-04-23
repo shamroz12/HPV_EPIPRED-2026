@@ -1311,48 +1311,81 @@ if "df" in st.session_state:
         </div>
         """, unsafe_allow_html=True)
 
-       # ==========================
-        # IMMUNOGENICITY / RADAR
         # ==========================
+        # IMMUNOGENICITY FINGERPRINT
+        # ==========================
+        with tab_fingerprint:
 
-        mean_prob = df["Probability"].mean()
-        epitope_density = len(df[df["Category"]=="Epitope"]) / len(df)
+                st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+                st.markdown("### 🧬 Protein Immunogenicity Fingerprint")
 
-        def hydrophobicity(seq):
-                hydro = set("AILMFWYV")
-                return sum(aa in hydro for aa in seq) / len(seq)
+                st.markdown("""
+        <div class="legend-box">
 
-        def charge(seq):
-                pos = set("KRH")
-                neg = set("DE")
-                return (sum(aa in pos for aa in seq) - sum(aa in neg for aa in seq)) / len(seq)
+        <div class="legend-title">🧬 Fingerprint Metrics</div>
 
-        hydro_score = np.mean([hydrophobicity(p) for p in df["Peptide"]])
-        charge_score = np.mean([charge(p) for p in df["Peptide"]])
-        entropy_score = 0
+        <div class="legend-item">🤖 <b>ML Immunogenicity</b> – Average predicted epitope probability</div>
+        <div class="legend-item">📍 <b>Epitope Density</b> – Fraction of peptides classified as epitopes</div>
+        <div class="legend-item">🧪 <b>Hydrophobicity</b> – Fraction of hydrophobic amino acids</div>
+        <div class="legend-item">🧠 <b>Entropy</b> – Sequence diversity across peptides</div>
+        <div class="legend-item">⚡ <b>Net Charge</b> – Balance of positive and negative residues</div>
 
-        metrics = {
-                "ML Immunogenicity": mean_prob,
-                "Epitope Density": epitope_density,
-                "Hydrophobicity": hydro_score,
-                "Entropy": entropy_score,
-                "Net Charge": abs(charge_score)
-        }
+        </div>
+        """, unsafe_allow_html=True)
 
-        categories = list(metrics.keys())
-        values = list(metrics.values())
+                # ==========================
+                # METRICS
+                # ==========================
 
-        fig_radar = go.Figure()
+                mean_prob = df["Probability"].mean()
+                epitope_density = len(df[df["Category"]=="Epitope"]) / len(df)
 
-        fig_radar.add_trace(
-                go.Scatterpolar(
-                        r=values,
-                        theta=categories,
-                        fill="toself"
+                def hydrophobicity(seq):
+                        hydro = set("AILMFWYV")
+                        return sum(aa in hydro for aa in seq) / len(seq)
+
+                def charge(seq):
+                        pos = set("KRH")
+                        neg = set("DE")
+                        return (sum(aa in pos for aa in seq) - sum(aa in neg for aa in seq)) / len(seq)
+
+                hydro_score = np.mean([hydrophobicity(p) for p in df["Peptide"]])
+                charge_score = np.mean([charge(p) for p in df["Peptide"]])
+                entropy_score = 0
+
+                metrics = {
+                        "ML Immunogenicity": mean_prob,
+                        "Epitope Density": epitope_density,
+                        "Hydrophobicity": hydro_score,
+                        "Entropy": entropy_score,
+                        "Net Charge": abs(charge_score)
+                }
+
+                categories = list(metrics.keys())
+                values = list(metrics.values())
+
+                fig_radar = go.Figure()
+
+                fig_radar.add_trace(
+                        go.Scatterpolar(
+                                r=values,
+                                theta=categories,
+                                fill="toself",
+                                line=dict(color="#6366f1", width=3)
+                        )
                 )
-        )
 
-        st.plotly_chart(fig_radar, use_container_width=True)
+                fig_radar.update_layout(
+                        polar=dict(
+                                radialaxis=dict(
+                                        visible=True,
+                                        range=[0,1]
+                                )
+                        ),
+                        height=500
+                )
+
+                st.plotly_chart(fig_radar, use_container_width=True, config=config)
             
             
         # ==========================
@@ -1614,7 +1647,7 @@ if "df" in st.session_state:
 
         # TITLE
         elements.append(Paragraph("<b>HPV EPIPRED</b>", styles['Title']))
-        elements.append(Paragraph("AI-based MHC-I Epitope Prediction Report", styles['Normal']))
+        elements.append(Paragraph("AI-based MHC-I & II Epitope Prediction Report", styles['Normal']))
         elements.append(Spacer(1, 20))
 
         # SUMMARY
