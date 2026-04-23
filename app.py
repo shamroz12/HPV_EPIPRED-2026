@@ -952,22 +952,21 @@ with tab_cd4:
             st.success("CD4 Prediction Completed ✅")
             st.session_state["df"] = df
 
-        if "df" in st.session_state:
+     if "df" in st.session_state:
 
     df = st.session_state["df"]
-    
-        # ==========================
-        # SPLIT TABLES
-        # ==========================
-        epitope_df = df[df["Category"] == "Epitope"].sort_values(
-            by="Probability", ascending=False
-        )
 
-        non_df = df[df["Category"] == "Non-Epitope"].sort_values(
-            by="Probability", ascending=False
-        )
+    # ==========================
+    # SPLIT TABLES
+    # ==========================
+    epitope_df = df[df["Category"] == "Epitope"].sort_values(
+        by="Probability", ascending=False
+    )
 
-                
+    non_df = df[df["Category"] == "Non-Epitope"].sort_values(
+        by="Probability", ascending=False
+    )
+      
         # ==========================
         # RESULT TABS
         # ==========================
