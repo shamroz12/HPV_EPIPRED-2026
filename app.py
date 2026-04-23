@@ -946,7 +946,7 @@ with tab_cd4:
             if not l.startswith(">")
         ]).upper()
 
-       df = run_prediction_pipeline(seq, model, lengths, threshold, feature_func)
+    df = run_prediction_pipeline(seq, model, lengths, threshold, feature_func)
 
 if df is not None:
     st.success("CD4 Prediction Completed ✅")
