@@ -746,25 +746,25 @@ def extract_features_cd4(seq):
 
     seq = str(seq)
 
-    if len(seq) > 15:
+    if len(seq) < 13 or len(seq) > 18:
         return None
-
-    if len(seq) < 15:
-        seq = seq + "X"*(15-len(seq))
 
     aa_list_cd4 = list("ACDEFGHIKLMNPQRSTVWY")
     aa_index_cd4 = {aa:i for i,aa in enumerate(aa_list_cd4)}
 
-    pos = np.zeros((15, len(aa_list_cd4)))
+    max_len = 18
 
-    for i in range(15):
-        aa = seq[i]
+    # pad with dummy AA (skip encoding)
+    padded_seq = seq + "-"*(max_len - len(seq))
+
+    pos = np.zeros((max_len, len(aa_list_cd4)))
+
+    for i in range(max_len):
+        aa = padded_seq[i]
         if aa in aa_index_cd4:
             pos[i, aa_index_cd4[aa]] = 1
 
-    pos = pos.flatten()
-
-    return pos
+    return pos.flatten()
     
 def safe_feature(p):
     model_type = st.session_state.get("model_type", "CD8")  # default safe
