@@ -946,25 +946,18 @@ with tab_cd4:
             if not l.startswith(">")
         ]).upper()
 
-        df = run_prediction_pipeline(seq, model, lengths, threshold, feature_func)
+       df = run_prediction_pipeline(seq, model, lengths, threshold, feature_func)
 
-        if df is not None:
-            st.success("CD4 Prediction Completed ✅")
-            st.session_state["df"] = df
-
-    if df is not None:
+if df is not None:
     st.success("CD4 Prediction Completed ✅")
     st.session_state["df"] = df
 
 
-  # ✅ FIXED INDENTATION BLOCK
+# ✅ FIXED INDENTATION BLOCK
 if "df" in st.session_state:
 
     df = st.session_state["df"]
 
-    # ==========================
-    # SPLIT TABLES
-    # ==========================
     epitope_df = df[df["Category"] == "Epitope"].sort_values(
         by="Probability", ascending=False
     )
