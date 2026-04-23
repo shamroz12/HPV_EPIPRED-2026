@@ -954,7 +954,7 @@ with tab_cd4:
 
         if "df" in st.session_state:
 
-        df = st.session_state["df"]
+    df = st.session_state["df"]
     
         # ==========================
         # SPLIT TABLES
