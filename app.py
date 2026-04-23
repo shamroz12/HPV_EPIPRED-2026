@@ -1314,7 +1314,7 @@ if "df" in st.session_state:
                 mean_prob = df["Probability"].mean()
                 epitope_density = len(df[df["Category"]=="Epitope"]) / len(df)
 
-                # ==========================
+        # ==========================
         # BIOLOGICAL METRICS (CD4 SAFE)
         # ==========================
 
@@ -1327,7 +1327,6 @@ if "df" in st.session_state:
                 neg = set("DE")
                 return (sum(aa in pos for aa in seq) - sum(aa in neg for aa in seq)) / len(seq)
 
-        # ✅ NOW OUTSIDE FUNCTIONS
         hydro_score = np.mean([
                 hydrophobicity(p)
                 for p in df["Peptide"]
@@ -1348,32 +1347,32 @@ if "df" in st.session_state:
                 "Net Charge": abs(charge_score)
         }
 
-                categories = list(metrics.keys())
-                values = list(metrics.values())
+        categories = list(metrics.keys())
+        values = list(metrics.values())
 
-                fig_radar = go.Figure()
+        fig_radar = go.Figure()
 
-                fig_radar.add_trace(
-                        go.Scatterpolar(
-                                r=values,
-                                theta=categories,
-                                fill="toself",
-                                line=dict(color="#6366f1", width=3),
-                                name="Protein Profile"
+        fig_radar.add_trace(
+                go.Scatterpolar(
+                        r=values,
+                        theta=categories,
+                        fill="toself",
+                        line=dict(color="#6366f1", width=3),
+                        name="Protein Profile"
+                )
+        )
+
+        fig_radar.update_layout(
+                polar=dict(
+                        radialaxis=dict(
+                                visible=True,
+                                range=[0,1]
                         )
-                )
+                ),
+                height=500
+        )
 
-                fig_radar.update_layout(
-                        polar=dict(
-                                radialaxis=dict(
-                                        visible=True,
-                                        range=[0,1]
-                                )
-                        ),
-                        height=500
-                )
-
-                st.plotly_chart(fig_radar, use_container_width=True, config=config)
+        st.plotly_chart(fig_radar, use_container_width=True, config=config)
             
             
         # ==========================
