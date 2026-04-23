@@ -1311,12 +1311,12 @@ if "df" in st.session_state:
         </div>
         """, unsafe_allow_html=True)
 
-                mean_prob = df["Probability"].mean()
-                epitope_density = len(df[df["Category"]=="Epitope"]) / len(df)
+       # ==========================
+        # IMMUNOGENICITY / RADAR
+        # ==========================
 
-        # ==========================
-        # BIOLOGICAL METRICS (CD4 SAFE)
-        # ==========================
+        mean_prob = df["Probability"].mean()
+        epitope_density = len(df[df["Category"]=="Epitope"]) / len(df)
 
         def hydrophobicity(seq):
                 hydro = set("AILMFWYV")
@@ -1327,16 +1327,8 @@ if "df" in st.session_state:
                 neg = set("DE")
                 return (sum(aa in pos for aa in seq) - sum(aa in neg for aa in seq)) / len(seq)
 
-        hydro_score = np.mean([
-                hydrophobicity(p)
-                for p in df["Peptide"]
-        ])
-
-        charge_score = np.mean([
-                charge(p)
-                for p in df["Peptide"]
-        ])
-
+        hydro_score = np.mean([hydrophobicity(p) for p in df["Peptide"]])
+        charge_score = np.mean([charge(p) for p in df["Peptide"]])
         entropy_score = 0
 
         metrics = {
@@ -1356,23 +1348,11 @@ if "df" in st.session_state:
                 go.Scatterpolar(
                         r=values,
                         theta=categories,
-                        fill="toself",
-                        line=dict(color="#6366f1", width=3),
-                        name="Protein Profile"
+                        fill="toself"
                 )
         )
 
-        fig_radar.update_layout(
-                polar=dict(
-                        radialaxis=dict(
-                                visible=True,
-                                range=[0,1]
-                        )
-                ),
-                height=500
-        )
-
-        st.plotly_chart(fig_radar, use_container_width=True, config=config)
+        st.plotly_chart(fig_radar, use_container_width=True)
             
             
         # ==========================
