@@ -13,6 +13,10 @@ def generate_peptides(seq, lengths):
 
     return peptides, positions
 
+import streamlit as st
+
+st.set_page_config(page_title="HPV EPIPRED", page_icon="🧬", layout="wide")
+
 st.markdown("""
 <style>
 
@@ -45,9 +49,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-import streamlit as st
-
-st.set_page_config(page_title="HPV EPIPRED", page_icon="🧬", layout="wide")
 
 st.markdown("""
 <style>
