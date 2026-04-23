@@ -771,6 +771,14 @@ def extract_features_cd4(seq):
     ])
 
     return np.concatenate([pos, comp])
+
+def safe_feature(p):
+    model_type = st.session_state.get("model_type", "CD8")  # default safe
+
+    if model_type == "CD8":
+        return extract_features_cd8(p)
+    else:
+        return extract_features_cd4(p)
     
 st.markdown("""
 <style>
@@ -1273,13 +1281,6 @@ if "df" in st.session_state:
 
         </div>
         """, unsafe_allow_html=True)
-
-                 # ✅ DEFINE FUNCTION INSIDE BLOCK (INDENTED)
-    def safe_feature(p):
-        if st.session_state.get("model_type") == "CD8":
-            return extract_features_cd8(p)
-        else:
-            return extract_features_cd4(p)
 
     # Global metrics
     mean_prob = df["Probability"].mean()
