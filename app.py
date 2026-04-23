@@ -740,31 +740,26 @@ def extract_features_cd8(seq):
 
 
 # =========================================================
-# CD4 FEATURE FUNCTION (FIXED LENGTH = 15)
+# CD4 FEATURE FUNCTION 
 # =========================================================
 def extract_features_cd4(seq):
 
     seq = str(seq)
 
+    # allow only valid lengths (optional)
     if len(seq) < 13 or len(seq) > 18:
         return None
 
     aa_list_cd4 = list("ACDEFGHIKLMNPQRSTVWY")
-    aa_index_cd4 = {aa:i for i,aa in enumerate(aa_list_cd4)}
 
-    max_len = 18
+    aa_count = Counter(seq)
+    length = len(seq)
 
-    # pad with dummy AA (skip encoding)
-    padded_seq = seq + "-"*(max_len - len(seq))
+    comp = np.array([
+        aa_count.get(aa, 0) / length for aa in aa_list_cd4
+    ])
 
-    pos = np.zeros((max_len, len(aa_list_cd4)))
-
-    for i in range(max_len):
-        aa = padded_seq[i]
-        if aa in aa_index_cd4:
-            pos[i, aa_index_cd4[aa]] = 1
-
-    return pos.flatten()
+    return comp   # ✅ ONLY 20 FEATURES
     
 def safe_feature(p):
     model_type = st.session_state.get("model_type", "CD8")  # default safe
