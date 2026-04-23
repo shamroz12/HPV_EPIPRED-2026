@@ -1,10 +1,9 @@
-def generate_peptides(seq):
+def generate_peptides(seq, lengths):
+
     peptides = []
     positions = []
 
-    lengths = [8, 9, 10]   # ✅ updated
-
-    # CLEAN sequence (VERY IMPORTANT)
+    # CLEAN sequence
     seq = "".join([a for a in seq.upper() if a in "ACDEFGHIKLMNPQRSTVWY"])
 
     for L in lengths:
@@ -691,30 +690,35 @@ drawNetwork();
 # MODEL
 # =========================================================
 @st.cache_resource
-def load_model():
-    return joblib.load("hpv_cd8_model.pkl")
+def load_models():
+    cd8_model = joblib.load("hpv_cd8_model.pkl")
+    cd4_model = joblib.load("hpv_cd4_model.pkl")
+    return cd8_model, cd4_model
 
-model = load_model()
-threshold = 0.261
+cd8_model, cd4_model = load_models()
 
-# ===== AA LIST (WITH X — IMPORTANT) =====
+
+# =========================================================
+# AMINO ACIDS (GLOBAL)
+# =========================================================
 aa_list = list("ACDEFGHIKLMNPQRSTVWYX")
-aa_index = {aa:i for i,aa in enumerate(aa_list)}
+aa_index = {aa: i for i, aa in enumerate(aa_list)}
 
-def extract_features(seq):
+
+# =========================================================
+# CD8 FEATURE FUNCTION (FIXED LENGTH = 10)
+# =========================================================
+def extract_features_cd8(seq):
 
     seq = str(seq)
 
+    # Only allow CD8 lengths
     if len(seq) not in [8, 9, 10]:
         return None
 
-    # pad to 10 using X (important)
+    # Pad to length 10
     if len(seq) < 10:
-        seq = seq + "X"*(10-len(seq))
-
-    # ===== POSITION (WITH X → 21 AA) =====
-    aa_list = list("ACDEFGHIKLMNPQRSTVWYX")
-    aa_index = {aa:i for i,aa in enumerate(aa_list)}
+        seq = seq + "X" * (10 - len(seq))
 
     pos = np.zeros((10, len(aa_list)))
 
@@ -723,18 +727,50 @@ def extract_features(seq):
         if aa in aa_index:
             pos[i, aa_index[aa]] = 1
 
-    pos = pos.flatten()   # 210 features
+    pos = pos.flatten()   # 210
 
-    # ===== AA COMPOSITION (21 features) =====
     aa_count = Counter(seq)
     length = len(seq)
 
     comp = np.array([
-        aa_count.get(aa, 0)/length for aa in aa_list
-    ])  # 21 features
+        aa_count.get(aa, 0) / length for aa in aa_list
+    ])  # 21
 
-    # ===== FINAL =====
-    return np.concatenate([pos, comp])   # 🔥 210 + 21 = 231
+    return np.concatenate([pos, comp])   # 231
+
+
+# =========================================================
+# CD4 FEATURE FUNCTION (FIXED LENGTH = 15)
+# =========================================================
+def extract_features_cd4(seq):
+
+    seq = str(seq)
+
+    # Reject too long peptides
+    if len(seq) > 15:
+        return None
+
+    # Pad to length 15
+    if len(seq) < 15:
+        seq = seq + "X" * (15 - len(seq))
+
+    pos = np.zeros((15, len(aa_list)))
+
+    for i in range(15):
+        aa = seq[i]
+        if aa in aa_index:
+            pos[i, aa_index[aa]] = 1
+
+    pos = pos.flatten()
+
+    aa_count = Counter(seq)
+    length = len(seq)
+
+    comp = np.array([
+        aa_count.get(aa, 0) / length for aa in aa_list
+    ])
+
+    return np.concatenate([pos, comp])
     
 st.markdown("""
 <style>
@@ -790,6 +826,41 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+def run_prediction_pipeline(seq, model, lengths, threshold, feature_func):
+
+    peptides, positions = generate_peptides(seq, lengths)
+
+    valid_peptides, valid_positions, features = [], [], []
+
+    for p, pos in zip(peptides, positions):
+
+        f = feature_func(p)
+
+        if f is not None:
+            valid_peptides.append(p)
+            valid_positions.append(pos)
+            features.append(f)
+
+    if len(features) == 0:
+        return None
+
+    X = np.array(features)
+    probs = model.predict_proba(X)[:,1]
+
+    df = pd.DataFrame({
+        "Position": valid_positions,
+        "Peptide": valid_peptides,
+        "Probability": probs
+    })
+
+    df["Category"] = df["Probability"].apply(
+        lambda x: "Epitope" if x >= threshold else "Non-Epitope"
+    )
+
+    df["Length"] = df["Peptide"].apply(len)
+
+    return df
+    
 # =========================================================
 # SCANNER SECTION (FULL RESTORED VERSION)
 # =========================================================
@@ -800,60 +871,91 @@ tab1, tab2 = st.tabs(["🔬 AI Scanner", "🧠 Model Explainability"])
 # ==========================
 # AI SCANNER TAB
 # ==========================
-with tab1:
 
-    mode = st.radio("Mode", ["Single Sequence","Batch Upload"])
+tab_cd8, tab_cd4 = st.tabs([
+    "🧬 CD8 Epitope Prediction (MHC-I)",
+    "🧠 CD4 Epitope Prediction (MHC-II)"
+])
+
+# =========================================================
+# CD8
+# =========================================================
+st.session_state["model_type"] = "CD8"
+
+with tab_cd8:
+
+    model = cd8_model
+    lengths = [8, 9, 10]
+    threshold = 0.261
+    feature_func = extract_features_cd8
+
+    mode = st.radio("Mode (CD8)", ["Single Sequence","Batch Upload"], key="cd8_mode")
     fasta = ""
 
     if mode == "Single Sequence":
-        fasta = st.text_area("Paste FASTA Sequence")
+        fasta = st.text_area("Paste FASTA Sequence (CD8)", key="cd8_text")
     else:
-        uploaded = st.file_uploader("Upload FASTA File")
+        uploaded = st.file_uploader("Upload FASTA File (CD8)", key="cd8_file")
         if uploaded:
             fasta = uploaded.read().decode()
 
-    # BUTTON MUST BE INSIDE TAB
-    run_scan = st.button("Run AI Scan")
+    run_scan = st.button("Run CD8 Scan")
 
-if run_scan and fasta:
+    if run_scan and fasta:
 
         seq = "".join([
-                l.strip() for l in fasta.split("\n")
-                if not l.startswith(">")
+            l.strip() for l in fasta.split("\n")
+            if not l.startswith(">")
         ]).upper()
 
-        peptides, positions = generate_peptides(seq)
-              
-        valid_peptides = []
-        valid_positions = []
-        features = []
+        df = run_prediction_pipeline(seq, model, lengths, threshold, feature_func)
 
-        for p, pos in zip(peptides, positions):
+        if df is not None:
+            st.success("CD8 Prediction Completed ✅")
+            st.session_state["df"] = df
 
-            f = extract_features(p)
 
-            if f is not None:
-                valid_peptides.append(p)
-                valid_positions.append(pos)
-                features.append(f)
+# =========================================================
+# CD4
+# =========================================================
+st.session_state["model_type"] = "CD4"
 
-        X = np.array(features)
-        probs = model.predict_proba(X)[:,1]
-      
-        results = []
-        for pos, pep, prob in zip(positions, peptides, probs):
-            cat = "Epitope" if prob >= threshold else "Non-Epitope"
-            results.append([pos, pep, prob, cat])
+    with tab_cd4:
 
-        df = pd.DataFrame(
-            results,
-            columns=["Position","Peptide","Probability","Category"]
-        )
+    model = cd4_model
+    lengths = [15]   # based on your notebook
+    threshold = 0.5
+    feature_func = extract_features_cd4
 
-        st.session_state["df"] = df
+    mode = st.radio("Mode (CD4)", ["Single Sequence","Batch Upload"], key="cd4_mode")
+    fasta = ""
 
-        df["Length"] = df["Peptide"].apply(len)
+    if mode == "Single Sequence":
+        fasta = st.text_area("Paste FASTA Sequence (CD4)", key="cd4_text")
+    else:
+        uploaded = st.file_uploader("Upload FASTA File (CD4)", key="cd4_file")
+        if uploaded:
+            fasta = uploaded.read().decode()
 
+    run_scan = st.button("Run CD4 Scan")
+
+    if run_scan and fasta:
+
+        seq = "".join([
+            l.strip() for l in fasta.split("\n")
+            if not l.startswith(">")
+        ]).upper()
+
+        df = run_prediction_pipeline(seq, model, lengths, threshold, feature_func)
+
+        if df is not None:
+            st.success("CD4 Prediction Completed ✅")
+            st.session_state["df"] = df
+
+        if "df" in st.session_state:
+
+    df = st.session_state["df"]
+    
         # ==========================
         # SPLIT TABLES
         # ==========================
@@ -1172,36 +1274,43 @@ if run_scan and fasta:
         </div>
         """, unsafe_allow_html=True)
 
-                # Global metrics
-                mean_prob = df["Probability"].mean()
+                 # ✅ DEFINE FUNCTION INSIDE BLOCK (INDENTED)
+    def safe_feature(p):
+        if st.session_state.get("model_type") == "CD8":
+            return extract_features_cd8(p)
+        else:
+            return extract_features_cd4(p)
 
-                epitope_density = len(df[df["Category"]=="Epitope"]) / len(df)
+    # Global metrics
+    mean_prob = df["Probability"].mean()
+    epitope_density = len(df[df["Category"]=="Epitope"]) / len(df)
 
-                hydro_score = np.mean([
-                        extract_features(p)[-7]
-                        for p in df["Peptide"]
-                ])
+    hydro_score = np.mean([
+        safe_feature(p)[-7]
+        for p in df["Peptide"]
+    ])
 
-                entropy_score = np.mean([
-                        extract_features(p)[-2]
-                        for p in df["Peptide"]
-                ])
+    entropy_score = np.mean([
+        safe_feature(p)[-2]
+        for p in df["Peptide"]
+    ])
 
-                charge_score = np.mean([
-                        extract_features(p)[-3]
-                        for p in df["Peptide"]
-                ])
+    charge_score = np.mean([
+        safe_feature(p)[-3]
+        for p in df["Peptide"]
+    ])
 
-                metrics = {
-                        "ML Immunogenicity": mean_prob,
-                        "Epitope Density": epitope_density,
-                        "Hydrophobicity": hydro_score,
-                        "Entropy": entropy_score,
-                        "Net Charge": abs(charge_score)
-                }
-
+    metrics = {
+        "ML Immunogenicity": mean_prob,
+        "Epitope Density": epitope_density,
+        "Hydrophobicity": hydro_score,
+        "Entropy": entropy_score,
+        "Net Charge": abs(charge_score)
+    }
+                
                 categories = list(metrics.keys())
                 values = list(metrics.values())
+
 
                 fig_radar = go.Figure()
 
