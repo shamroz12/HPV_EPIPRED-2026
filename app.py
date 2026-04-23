@@ -920,7 +920,7 @@ with tab_cd8:
 # =========================================================
 st.session_state["model_type"] = "CD4"
 
-    with tab_cd4:
+with tab_cd4:
 
     model = cd4_model
     lengths = [15]   # based on your notebook
