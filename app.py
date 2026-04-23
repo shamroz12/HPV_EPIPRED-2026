@@ -1327,7 +1327,7 @@ if "df" in st.session_state:
                 neg = set("DE")
                 return (sum(aa in pos for aa in seq) - sum(aa in neg for aa in seq)) / len(seq)
 
-        hydro_score = np.mean([
+                hydro_score = np.mean([
                 hydrophobicity(p)
                 for p in df["Peptide"]
         ])
@@ -1337,9 +1337,7 @@ if "df" in st.session_state:
                 for p in df["Peptide"]
         ])
 
-        entropy_score = 0   # placeholder (optional to improve later)
-
-               entropy_score = 0
+        entropy_score = 0
 
         metrics = {
                 "ML Immunogenicity": mean_prob,
