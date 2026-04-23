@@ -686,6 +686,10 @@ drawNetwork();
 </script>
 """, height=950)
 
+st.write("X shape:", X.shape)
+st.write("Model expects:", model.n_features_in_)
+st.stop()
+
 # =========================================================
 # MODEL
 # =========================================================
